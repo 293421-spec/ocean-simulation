@@ -1,0 +1,53 @@
+@startuml
+skinparam state {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  FontSize 13
+}
+
+[*] --> Inicjalizacja
+
+Inicjalizacja : Tworzenie planszy 20x20
+Inicjalizacja : 4 rekiny, 8 rybek, 12 planktonów
+Inicjalizacja : energia rybek i rekinów = 100
+
+Inicjalizacja --> StartTury
+
+StartTury : Nowa tura
+StartTury --> RuchRybek
+
+RuchRybek : Każda żywa rybka wykonuje\n 5 ruchów
+RuchRybek : Koszt ruchu: -5 energii
+RuchRybek : Detekcja planktonu (<=5 pól)\ni rekina (<=5 pól)
+RuchRybek : Zjedzenie planktonu: +10 energii,\nusunięcie planktonu
+
+RuchRybek --> RuchRekinow
+
+RuchRekinow : Każdy żywy rekin wykonuje\n 7 ruchów
+RuchRekinow : Koszt ruchu: -5 energii
+RuchRekinow : Detekcja rybki (<=5 pól)\ni planktonu (<=5 pól)
+RuchRekinow : Atak na rybkę: rybka -20,\nrekin +20 energii
+
+RuchRekinow --> WeryfikacjaStanu
+
+WeryfikacjaStanu : Sprawdzenie energii wszystkich\nrybek i rekinów
+WeryfikacjaStanu : Oznaczenie martwych\n(energia <= 0)
+WeryfikacjaStanu : Zliczenie żywych rybek,\nrekinów i planktonu
+
+WeryfikacjaStanu --> WyswietlenieStanu
+
+WyswietlenieStanu : Wyświetlenie liczby\nżywych rybek
+WyswietlenieStanu : Wyświetlenie liczby\nżywych rekinów
+WyswietlenieStanu : Wyświetlenie liczby\nobiektów planktonu
+
+WyswietlenieStanu --> SprawdzenieWarunku
+
+SprawdzenieWarunku : Czy wszystkie rybki\nsą martwe?
+
+SprawdzenieWarunku --> StartTury : Przynajmniej\njedna rybka żyje
+SprawdzenieWarunku --> KoniecSymulacji : Wszystkie rybki\nsą martwe
+
+KoniecSymulacji : Wyświetlenie końcowych\nstatystyk symulacji
+KoniecSymulacji --> [*]
+
+@enduml

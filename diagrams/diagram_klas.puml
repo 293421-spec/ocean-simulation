@@ -1,0 +1,52 @@
+@startuml
+title Symulacja życia w oceanie - Diagram klas
+
+class Ocean {
+  - int szerokosc = 20
+  - int wysokosc = 20
+  - List<Organizm> organizmy
+  + void inicjalizuj()
+  + void wykonajTure()
+  + void wyswietlStan()
+  + boolean czyKoniec()
+}
+
+abstract class Organizm {
+  - int x
+  - int y
+  - boolean zywy = true
+  + boolean czyZywy()
+  + void umrzyj()
+}
+
+class Plankton extends Organizm {
+}
+
+abstract class Zwierze extends Organizm {
+  - int energia
+  - int maksRuchow = 5
+  + void zmniejszEnergie(int wartosc)
+  + void zwiekszEnergie(int wartosc)
+  + void wykonajRuch()
+  + boolean mozeRuszac()
+}
+
+class Rybka extends Zwierze {
+  + void wykonajRuch()
+  + void sprawdzOtoczenie()
+  + void jedzPlankton(Plankton p)
+}
+
+class Rekin extends Zwierze {
+  + void wykonajRuch()
+  + void sprawdzOtoczenie()
+  + void atakuj(Rybka r)
+}
+
+Ocean "1" *-- "*" Organizm
+Organizm <|-- Plankton
+Organizm <|-- Zwierze
+Zwierze <|-- Rybka
+Zwierze <|-- Rekin
+
+@enduml

@@ -1,0 +1,102 @@
+@startuml
+title Symulacja życia w oceanie - Diagram sekwencji (przebieg tury)
+
+actor Uzytkownik as U
+participant "ocean : Ocean" as O
+participant "rybka : Rybka" as R
+participant "rekin : Rekin" as S
+participant "plankton : Plankton" as P
+
+== Inicjalizacja (REQ-001, REQ-002, REQ-003) ==
+
+U -> O : inicjalizuj()
+activate O
+O -> R ** : create() [x8, energia = 100]
+O -> S ** : create() [x4, energia = 100]
+O -> P ** : create() [x12]
+deactivate O
+
+== Główna pętla symulacji ==
+
+loop dopóki czyKoniec() == false
+
+    U -> O : wykonajTure()
+    activate O
+
+    group Ruch rybek (REQ-007, REQ-009)
+        loop dla każdej żywej rybki
+            O -> R : wykonajRuch()
+            activate R
+            R -> R : sprawdzOtoczenie()
+            note right of R
+                Detekcja planktonu (<=5 pól) - REQ-010
+                Detekcja rekina (<=5 pól)   - REQ-011
+                Ucieczka przed rekinem ma priorytet
+                nad ruchem do planktonu     - REQ-013
+            end note
+            loop maks. 5 ruchów (REQ-005)
+                R -> R : przesun() (REQ-012 / REQ-013)
+                R -> R : zmniejszEnergie(5) (REQ-006)
+                opt rybka na polu planktonu
+                    R -> P : jedzPlankton() (REQ-014)
+                    activate P
+                    R -> R : zwiekszEnergie(10)
+                    P -> P : umrzyj()
+                    deactivate P
+                end
+            end
+            deactivate R
+        end
+    end
+
+    group Ruch rekinów (REQ-008, REQ-009)
+        loop dla każdego żywego rekina
+            O -> S : wykonajRuch()
+            activate S
+            S -> S : sprawdzOtoczenie()
+            note right of S
+                Detekcja rybki (<=7 pól)    - REQ-015
+                Detekcja planktonu (<=7 pól) - REQ-016
+                Priorytet celu: rybka > plankton - REQ-019
+            end note
+            loop maks. 5 ruchów (REQ-005)
+                S -> S : przesun() (REQ-017 / REQ-018)
+                S -> S : zmniejszEnergie(5) (REQ-006)
+                opt rekin na polu rybki
+                    S -> R : atakuj() (REQ-020)
+                    activate R
+                    R -> R : zmniejszEnergie(20)
+                    S -> S : zwiekszEnergie(20)
+                    opt energia rybki <= 0 (REQ-021)
+                        R -> R : umrzyj()
+                    end
+                    deactivate R
+                end
+            end
+            deactivate S
+        end
+    end
+
+    group Weryfikacja i wyświetlenie stanu
+        O -> O : weryfikujStan()
+        note right of O
+            Oznaczenie martwych obiektów (REQ-021, REQ-022)
+            Pomijanie martwych w kolejnych turach (REQ-023)
+            Zliczenie żywych rybek, rekinów i planktonu
+        end note
+        O -> O : wyswietlStan() (REQ-024)
+    end
+
+    O --> U : stan po turze
+    deactivate O
+
+end
+
+== Zakończenie symulacji (REQ-025) ==
+
+U -> O : wyswietlKoncoweStatystyki()
+activate O
+O --> U : końcowe statystyki
+deactivate O
+
+@enduml
