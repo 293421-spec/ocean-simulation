@@ -1,5 +1,7 @@
 package pl.simulation.ocean.model;
 
+import pl.simulation.ocean.util.Position;
+
 public class Plankton extends Entity {
 
     private boolean eaten;
@@ -11,6 +13,11 @@ public class Plankton extends Entity {
 
     public void eat() {
         this.eaten = true;
+    }
+
+    public void restoreState(int x, int y, boolean eaten) {
+        this.position = new Position(x, y);
+        this.eaten = eaten;
     }
 
     @Override

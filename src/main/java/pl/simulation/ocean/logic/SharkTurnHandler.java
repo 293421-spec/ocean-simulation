@@ -11,9 +11,15 @@ import java.util.Random;
 public class SharkTurnHandler {
 
     private final Random random;
+    private final boolean verbose;
 
     public SharkTurnHandler(Random random) {
+        this(random, true);
+    }
+
+    public SharkTurnHandler(Random random, boolean verbose) {
         this.random = random;
+        this.verbose = verbose;
     }
 
     public void executeTurn(Shark shark, Ocean ocean) {
@@ -62,12 +68,14 @@ public class SharkTurnHandler {
         for (Fish fish : fishList) {
             if (shark.getPosition().equals(fish.getPosition())) {
                 shark.attack(fish);
-                System.out.println("  " + shark.getName() + " zaatakował " + fish.getName()
-                        + " na " + shark.getPosition()
-                        + " | energia rybki: " + fish.getEnergy()
-                        + " | energia rekina: " + shark.getEnergy());
-                if (!fish.isAlive()) {
-                    System.out.println("  " + fish.getName() + " zginęła!");
+                if (verbose) {
+                    System.out.println("  " + shark.getName() + " zaatakował " + fish.getName()
+                            + " na " + shark.getPosition()
+                            + " | energia rybki: " + fish.getEnergy()
+                            + " | energia rekina: " + shark.getEnergy());
+                    if (!fish.isAlive()) {
+                        System.out.println("  " + fish.getName() + " zginęła!");
+                    }
                 }
                 break;
             }
@@ -80,8 +88,10 @@ public class SharkTurnHandler {
             if (shark.getPosition().equals(plankton.getPosition())) {
                 plankton.eat();
                 shark.gainEnergy(Shark.PLANKTON_ENERGY);
-                System.out.println("  " + shark.getName() + " zjadł plankton na " + shark.getPosition()
-                        + " | energia: " + shark.getEnergy());
+                if (verbose) {
+                    System.out.println("  " + shark.getName() + " zjadł plankton na " + shark.getPosition()
+                            + " | energia: " + shark.getEnergy());
+                }
                 break;
             }
         }
