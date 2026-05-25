@@ -1,0 +1,40 @@
+@startuml
+title Diagram obiektów - przykładowy stan gry
+
+object ocean {
+  szerokosc = 20
+  wysokosc = 20
+}
+
+object rybka1 {
+  x = 5
+  y = 10
+  energia = 80
+}
+
+object rybka2 {
+  x = 8
+  y = 15
+  energia = 100
+}
+
+object rekin1 {
+  x = 7
+  y = 12
+  energia = 90
+}
+
+object plankton1 {
+  x = 10
+  y = 10
+}
+
+ocean --> rybka1
+ocean --> rybka2
+ocean --> rekin1
+ocean --> plankton1
+
+rekin1 --> rybka1 : cel ruchu
+rybka1 --> plankton1 : cel ruchu
+
+@enduml
