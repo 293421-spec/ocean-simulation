@@ -1,5 +1,7 @@
 package pl.simulation.ocean.model;
 
+import pl.simulation.ocean.util.Position;
+
 public abstract class LivingEntity extends Entity {
 
     public static final int INITIAL_ENERGY = 100;
@@ -23,6 +25,11 @@ public abstract class LivingEntity extends Entity {
 
     public void loseEnergy(int amount) {
         this.energy -= amount;
+    }
+
+    public void restoreState(int x, int y, int energy) {
+        this.position = new Position(x, y);
+        this.energy = energy;
     }
 
     public boolean consumeMoveEnergy() {

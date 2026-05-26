@@ -19,6 +19,10 @@ public class OceanInitializer {
     }
 
     public void initialize(Ocean ocean) {
+        initialize(ocean, true);
+    }
+
+    public void initialize(Ocean ocean, boolean verbose) {
         Set<String> usedPositions = new HashSet<>();
 
         for (int i = 1; i <= SHARK_COUNT; i++) {
@@ -36,11 +40,13 @@ public class OceanInitializer {
             ocean.addPlankton(new Plankton(pos[0], pos[1]));
         }
 
-        System.out.println("- Inicjalizacja oceanu -");
-        System.out.println("  Rekiny:   " + ocean.getSharks().size());
-        System.out.println("  Rybki:    " + ocean.getFish().size());
-        System.out.println("  Plankton: " + ocean.getPlanktons().size());
-        System.out.println();
+        if (verbose) {
+            System.out.println("- Inicjalizacja oceanu -");
+            System.out.println("  Rekiny:   " + ocean.getSharks().size());
+            System.out.println("  Rybki:    " + ocean.getFish().size());
+            System.out.println("  Plankton: " + ocean.getPlanktons().size());
+            System.out.println();
+        }
     }
 
     private int[] randomFreePosition(Set<String> used, Ocean ocean) {

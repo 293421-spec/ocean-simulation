@@ -11,9 +11,15 @@ import java.util.Random;
 public class FishTurnHandler {
 
     private final Random random;
+    private final boolean verbose;
 
     public FishTurnHandler(Random random) {
+        this(random, true);
+    }
+
+    public FishTurnHandler(Random random, boolean verbose) {
         this.random = random;
+        this.verbose = verbose;
     }
 
     public void executeTurn(Fish fish, Ocean ocean) {
@@ -61,8 +67,10 @@ public class FishTurnHandler {
             if (fish.getPosition().equals(plankton.getPosition())) {
                 plankton.eat();
                 fish.gainEnergy(Fish.PLANKTON_ENERGY);
-                System.out.println("  " + fish.getName() + " zjadła plankton na " + fish.getPosition()
-                        + " | energia: " + fish.getEnergy());
+                if (verbose) {
+                    System.out.println("  " + fish.getName() + " zjadła plankton na " + fish.getPosition()
+                            + " | energia: " + fish.getEnergy());
+                }
                 break;
             }
         }
