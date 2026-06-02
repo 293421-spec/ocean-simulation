@@ -7,8 +7,16 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testy integracyjne klasy {@link pl.simulation.ocean.logic.Simulation}.
+ * Uruchamiają pełną pętlę symulacji z zadanym ziarnem i weryfikują:
+ * poprawną inicjalizację, warunek zakończenia (wszystkie rybki martwe),
+ * determinizm przy stałym ziarnie oraz kolejność faz (rybki przed rekinami).
+ * Wyjście na {@code System.out} jest wyciszane przez {@link pl.simulation.ocean.testutil.SystemOutSilencer}.
+ */
 class SimulationTest {
 
+    /** Nowo zbudowana symulacja ma niepuste listy rybek, rekinów i planktonu oraz numer tury 0. */
     @Test
     void constructorInitializesOceanWithEntities() throws Exception {
         Simulation simulation;
@@ -22,6 +30,10 @@ class SimulationTest {
         assertEquals(0, simulation.getTurnNumber());
     }
 
+    /**
+     * Pełne uruchomienie symulacji kończy się gdy nie ma żywych rybek;
+     * output zawiera komunikaty "Koniec symulacji" i "Wszystkie rybki zginęły".
+     */
     @Test
     void runEndsWhenAllFishAreDead() throws Exception {
         Simulation simulation;
@@ -38,6 +50,7 @@ class SimulationTest {
         assertTrue(output.contains("Wszystkie rybki zginęły"));
     }
 
+    /** Dwa uruchomienia z tym samym ziarnem kończą się po tej samej liczbie tur i z tą samą liczbą żywych rekinów. */
     @Test
     void runIsDeterministicForFixedSeed() throws Exception {
         int turnsFirst;
@@ -62,6 +75,10 @@ class SimulationTest {
         assertEquals(liveSharksFirst, liveSharksSecond);
     }
 
+    /**
+     * W logu pierwszej tury akcje rybek (zjedzenie planktonu) pojawiają się przed atakami rekinów,
+     * co potwierdza, że faza rybek poprzedza fazę rekinów.
+     */
     @Test
     void fishPhasePrecedesSharksInTurnOrder() throws Exception {
         try (SystemOutSilencer silencer = new SystemOutSilencer()) {

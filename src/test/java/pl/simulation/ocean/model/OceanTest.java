@@ -10,6 +10,12 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testy klasy {@link pl.simulation.ocean.model.Ocean}.
+ * Sprawdzają wymiary planszy, rejestrację organizmów, sprawdzanie granic,
+ * filtrowanie żywych/martwych jednostek, warunek końca symulacji
+ * oraz treść komunikatu stanu tury.
+ */
 class OceanTest {
 
     private Ocean ocean;
@@ -19,12 +25,14 @@ class OceanTest {
         ocean = new Ocean();
     }
 
+    /** Wymiary planszy muszą wynosić dokładnie 20×20. */
     @Test
     void boardDimensionsAreTwentyByTwenty() {
         assertEquals(20, Ocean.WIDTH);
         assertEquals(20, Ocean.HEIGHT);
     }
 
+    /** Nowo utworzony ocean nie zawiera żadnych organizmów. */
     @Test
     void startsEmpty() {
         assertTrue(ocean.getFish().isEmpty());
@@ -32,6 +40,7 @@ class OceanTest {
         assertTrue(ocean.getPlanktons().isEmpty());
     }
 
+    /** Metody {@code addFish}, {@code addShark}, {@code addPlankton} umieszczają organizmy w odpowiednich listach. */
     @Test
     void addMethodsRegisterEntitiesInLists() {
         Fish fish = new Fish("Rybka1", 1, 1);
@@ -48,6 +57,7 @@ class OceanTest {
         assertSame(fish, ocean.getFish().get(0));
     }
 
+    /** Komórki od (0,0) do (19,19) są w granicach; współrzędne ujemne i ≥ 20 — nie. */
     @Test
     void isWithinBoundsAcceptsValidCellsOnly() {
         assertTrue(ocean.isWithinBounds(0, 0));
@@ -61,6 +71,10 @@ class OceanTest {
         assertFalse(ocean.isWithinBounds(new Position(-1, 0)));
     }
 
+    /**
+     * {@code getLiveFish}, {@code getLiveSharks} i {@code getLivePlankton} zwracają tylko żywe jednostki —
+     * martwe rybki/rekiny (energia ≤ 0) i zjedzony plankton są pomijane.
+     */
     @Test
     void getLiveFiltersDeadEntities() {
         Fish alive = new Fish("A", 0, 0);
@@ -88,6 +102,7 @@ class OceanTest {
         assertSame(alive, ocean.getLiveFish().get(0));
     }
 
+    /** Symulacja kończy się, gdy nie ma żywych rybek; dołączenie żywej rybki wznawia symulację. */
     @Test
     void isSimulationOverWhenNoLiveFish() {
         assertTrue(ocean.isSimulationOver());
@@ -100,6 +115,7 @@ class OceanTest {
         assertTrue(ocean.isSimulationOver());
     }
 
+    /** Lista z wyłączniem martwej rybki jest traktowana jak pusta — symulacja jest skończona. */
     @Test
     void isSimulationOverIgnoresDeadFishInList() {
         Fish dead = new Fish("Rybka1", 0, 0);
@@ -108,6 +124,7 @@ class OceanTest {
         assertTrue(ocean.isSimulationOver());
     }
 
+    /** {@code printStatus} wypisuje numer tury oraz liczby żywych rybek, rekinów i planktonu. */
     @Test
     void printStatusWritesTurnSummary() throws Exception {
         ocean.addFish(new Fish("Rybka1", 0, 0));

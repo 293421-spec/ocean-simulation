@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
-/** Captures {@link System#out} during tests that trigger console logging. */
+/** Rejestruje {@link System#out} podczas testów, które powodują wygenerowanie komunikatów w konsoli */
 public final class SystemOutSilencer implements AutoCloseable {
 
     private final PrintStream original;
