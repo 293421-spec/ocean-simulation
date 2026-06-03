@@ -10,8 +10,15 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testy klasy {@link pl.simulation.ocean.logic.OceanInitializer}.
+ * Weryfikują, że inicjalizacja oceanu tworzy dokładnie 4 rekiny, 8 rybek i 12 planktonów,
+ * wszystkie żywe z pełną energią, na unikalnych komórkach w granicach planszy,
+ * z polskimi nazwami sekwencyjnymi oraz deterministycznym układem przy stałym ziarnie.
+ */
 class OceanInitializerTest {
 
+    /** Po inicjalizacji ocean zawiera dokładnie 4 rekiny, 8 rybek i 12 planktonów. */
     @Test
     void initializeSpawnsExpectedCounts() throws Exception {
         Ocean ocean = new Ocean();
@@ -24,6 +31,7 @@ class OceanInitializerTest {
         assertEquals(12, ocean.getPlanktons().size());
     }
 
+    /** Wszystkie rybki i rekiny startują z pełną energią (100) i są żywe; plankton też jest żywy. */
     @Test
     void allSpawnedEntitiesStartAliveWithFullEnergy() throws Exception {
         Ocean ocean = new Ocean();
@@ -42,6 +50,7 @@ class OceanInitializerTest {
         ocean.getPlanktons().forEach(p -> assertTrue(p.isAlive()));
     }
 
+    /** Wszystkie 24 organizmy (4+8+12) zajmują odrębne komórki wewnątrz planszy 20×20. */
     @Test
     void spawnPositionsAreUniqueAndWithinBounds() throws Exception {
         Ocean ocean = new Ocean();
@@ -57,6 +66,7 @@ class OceanInitializerTest {
         assertEquals(4 + 8 + 12, keys.size());
     }
 
+    /** Pierwszy rekin ma nazwę "Rekin1", pierwsza rybka — "Rybka1" (nazwy numerowane od 1). */
     @Test
     void sharksAndFishReceiveSequentialPolishNames() throws Exception {
         Ocean ocean = new Ocean();
@@ -68,6 +78,7 @@ class OceanInitializerTest {
         assertEquals("Rybka1", ocean.getFish().get(0).getName());
     }
 
+    /** To samo ziarno generuje identyczny układ startowy — pozycje pierwszej rybki i rekina są równe. */
     @Test
     void sameSeedProducesSameLayout() throws Exception {
         Ocean first = new Ocean();

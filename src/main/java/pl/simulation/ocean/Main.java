@@ -7,6 +7,10 @@ import java.util.Random;
 
 public class Main {
 
+    /**
+     * Punkt wejścia: opcjonalny seed oraz tryb GUI ({@code --gui} / {@code -g}).
+     * Bez flagi GUI uruchamiana jest symulacja tekstowa na konsoli; z flagą --gui lub -g - okno Swing.
+     */
     public static void main(String[] args) {
         boolean gui = false;
         Long seedArg = null;
@@ -27,6 +31,7 @@ public class Main {
         System.out.println("Seed: " + seed);
 
         if (gui) {
+            // Tryb graficzny: symulacja bez logów na stdout, sterowanie w SimulationWindow
             SimulationWindow.show(s -> new Simulation(new Random(s), false), seed);
         } else {
             Simulation simulation = new Simulation(new Random(seed));

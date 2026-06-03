@@ -11,11 +11,20 @@ import java.util.Deque;
 import java.util.Random;
 import java.util.function.LongFunction;
 
+/**
+ * Główne okno aplikacji Swing do obserwacji symulacji oceanu.
+ * Zawiera panel planszy ({@link OceanBoardPanel}), pasek statusu z liczbami żywych organizmów,
+ * legendę kolorów oraz sterowanie: start/pauza, krok do przodu i wstecz, reset i suwak szybkości.
+ * Automatyczna gra odbywa się przez {@link javax.swing.Timer}; przed każdą turą zapisywany jest snapshot
+ * stanu na potrzeby przycisku „Cofnij”.
+ */
 public class SimulationWindow extends JFrame {
 
+    /** Minimalny i maksymalny odstęp między turami w trybie automatycznym (ms). */
     private static final int MIN_DELAY_MS = 50;
     private static final int MAX_DELAY_MS = 1500;
     private static final int DEFAULT_DELAY_MS = 350;
+    /** Maksymalna liczba snapshotów w historii cofania. */
     private static final int MAX_HISTORY = 100;
 
     private final LongFunction<Simulation> simulationFactory;
@@ -36,6 +45,13 @@ public class SimulationWindow extends JFrame {
 
     private final Deque<SimulationSnapshot> history = new ArrayDeque<>();
 
+    /**
+     * Buduje układ okna: góra - status i legenda, środek - przewijana plansza,
+     * dół - przyciski i suwak szybkości. Podpina słuchaczy zdarzeń i uruchamia {@link #pack()}.
+     *
+     * @param simulationFactory fabryka tworząca nową symulację dla podanego seeda (np. przy resetowaniu)
+     * @param seed ziarno losowości wyświetlane w tytule okna
+     */
     public SimulationWindow(LongFunction<Simulation> simulationFactory, long seed) {
         this.simulationFactory = simulationFactory;
         this.currentSeed = seed;
@@ -103,10 +119,12 @@ public class SimulationWindow extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    /** Wariant konstruktora z gotową symulacją — wewnętrznie używa fabryki z wyłączonym logowaniem na konsolę. */
     public SimulationWindow(Simulation simulation, long seed) {
         this(s -> new Simulation(new Random(s), false), seed);
     }
 
+    /** Tworzy jeden wiersz legendy: kolorowy kwadracik i podpis (plankton / rybka / rekin). */
     private static JPanel legendItem(Color color, String text) {
         JPanel item = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         JPanel swatch = new JPanel();
@@ -118,6 +136,7 @@ public class SimulationWindow extends JFrame {
         return item;
     }
 
+    /** Przełącza tryb automatyczny: uruchamia lub zatrzymuje {@link #turnTimer} i aktualizuje etykietę Start/Pauza. */
     private void toggleRunning() {
         if (simulation.isFinished()) return;
         running = !running;
@@ -129,11 +148,16 @@ public class SimulationWindow extends JFrame {
         updateControls();
     }
 
+    /** Wykonuje jedną turę ręcznie (przycisk „Dalej”), tylko gdy symulacja nie jest zakończona i nie działa timer. */
     private void stepOnce() {
         if (simulation.isFinished() || running) return;
         advanceTurn();
     }
 
+    /**
+     * Odtwarza jedną turę w interfejsie: zapisuje snapshot, wywołuje {@link Simulation#executeNextTurn(boolean)}
+     * bez wypisywania na konsolę, odświeża planszę i pasek statusu; po końcu symulacji zatrzymuje timer.
+     */
     private void advanceTurn() {
         pushHistory();
         boolean hasMore = simulation.executeNextTurn(false);
@@ -148,6 +172,7 @@ public class SimulationWindow extends JFrame {
         updateControls();
     }
 
+    /** Dodaje snapshot stanu przed turą na stos historii; przy przepełnieniu usuwa najstarszą. */
     private void pushHistory() {
         if (history.size() >= MAX_HISTORY) {
             history.removeLast();
@@ -155,6 +180,10 @@ public class SimulationWindow extends JFrame {
         history.push(SimulationSnapshot.capture(simulation));
     }
 
+    /**
+     * Cofa symulację o jedną turę: przywraca ostatni snapshot z {@link #history},
+     * odświeża panel planszy i tekst statusu.
+     */
     private void stepBack() {
         if (history.isEmpty() || running) {
             return;
@@ -165,6 +194,7 @@ public class SimulationWindow extends JFrame {
         updateControls();
     }
 
+    /** Pokazuje okno dialogowe resetu: nowy seed, ten sam seed lub anulowanie. */
     private void promptReset() {
         if (running) {
             turnTimer.stop();
@@ -191,6 +221,10 @@ public class SimulationWindow extends JFrame {
         applyReset(newSeed);
     }
 
+    /**
+     * Tworzy świeżą symulację z wybranym seedem, czyści historię cofania,
+     * aktualizuje tytuł okna, planszę i dostępność przycisków.
+     */
     private void applyReset(long seed) {
         currentSeed = seed;
         simulation = simulationFactory.apply(seed);
@@ -203,6 +237,7 @@ public class SimulationWindow extends JFrame {
         repaint();
     }
 
+    /** Składa jednolinijkowy opis: numer tury oraz liczby żywych rybek, rekinów i planktonu. */
     private String buildStatusText() {
         Ocean ocean = simulation.getOcean();
         return String.format(
@@ -213,6 +248,7 @@ public class SimulationWindow extends JFrame {
                 ocean.getLivePlankton().size());
     }
 
+    /** Włącza lub wyłącza przyciski w zależności od stanu: koniec symulacji, tryb auto, czy jest historia cofania. */
     private void updateControls() {
         boolean finished = simulation.isFinished();
         startPauseButton.setEnabled(!finished);
@@ -222,6 +258,13 @@ public class SimulationWindow extends JFrame {
         resetButton.setEnabled(!running);
     }
 
+    /**
+     * Uruchamia okno w wątku zdarzeń Swing ({@link SwingUtilities#invokeLater}).
+     * Bezpieczny punkt wejścia z {@link pl.simulation.ocean.Main} lub testów GUI.
+     *
+     * @param factory fabryka symulacji dla danego seeda
+     * @param seed ziarno losowości
+     */
     public static void show(LongFunction<Simulation> factory, long seed) {
         SwingUtilities.invokeLater(() -> {
             SimulationWindow window = new SimulationWindow(factory, seed);
@@ -229,6 +272,7 @@ public class SimulationWindow extends JFrame {
         });
     }
 
+    /** Skrót wywołujący {@link #show(LongFunction, long)} z domyślną fabryką (symulacja bez logów konsoli). */
     public static void show(Simulation simulation, long seed) {
         show(s -> new Simulation(new Random(s), false), seed);
     }

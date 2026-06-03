@@ -4,8 +4,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testy klasy {@link pl.simulation.ocean.model.Shark}.
+ * Weryfikują stałe rekina, stan początkowy, mechanizm ataku na rybkę
+ * (transfer energii), warunek śmierci oraz format tekstowy.
+ */
 class SharkTest {
 
+    /** Stałe rekina (zasięg, obrażenia, zysk z ataku i planktonu) muszą odpowiadać specyfikacji. */
     @Test
     void exposesConstantsFromSpec() {
         assertEquals(7.0, Shark.DETECTION_RANGE);
@@ -14,6 +20,7 @@ class SharkTest {
         assertEquals(10, Shark.PLANKTON_ENERGY);
     }
 
+    /** Nowy rekin startuje z energią 100 i jest żywy. */
     @Test
     void startsAliveWithFullEnergy() {
         Shark shark = new Shark("Rekin1", 10, 11);
@@ -22,6 +29,7 @@ class SharkTest {
         assertTrue(shark.isAlive());
     }
 
+    /** Pojedynczy atak odbiera rybce 20 energii i dodaje rekinowi 20; obie jednostki pozostają żywe. */
     @Test
     void attackTransfersEnergyAccordingToRules() {
         Shark shark = new Shark("Rekin1", 5, 5);
@@ -35,6 +43,7 @@ class SharkTest {
         assertTrue(shark.isAlive());
     }
 
+    /** Pięć ataków (5 × 20 = 100) całkowicie wyczerpuje energię rybki i ją zabija. */
     @Test
     void repeatedAttackCanKillFish() {
         Shark shark = new Shark("Rekin1", 0, 0);
@@ -48,6 +57,7 @@ class SharkTest {
         assertEquals(0, fish.getEnergy());
     }
 
+    /** Rekin ginie po utracie całej energii. */
     @Test
     void diesWhenEnergyDepleted() {
         Shark shark = new Shark("Rekin1", 1, 1);
@@ -55,6 +65,7 @@ class SharkTest {
         assertFalse(shark.isAlive());
     }
 
+    /** Format tekstowy rekina jest analogiczny do rybki: {@code Imię@(x, y)[energia=N]}. */
     @Test
     void toStringIncludesNameEnergyAndPosition() {
         Shark shark = new Shark("Max", 2, 3);

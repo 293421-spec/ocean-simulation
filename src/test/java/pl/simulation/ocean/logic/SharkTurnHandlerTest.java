@@ -10,6 +10,12 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testy klasy {@link pl.simulation.ocean.logic.SharkTurnHandler}.
+ * Weryfikują logikę tury rekina: pomijanie martwych rekinów, atakowanie rybki
+ * na tej samej komórce (z komunikatem i transferem energii), zjadanie planktonu,
+ * ruch w kierunku rybki w zasięgu oraz priorytet polowania na rybkę nad planktonem.
+ */
 class SharkTurnHandlerTest {
 
     private Ocean ocean;
@@ -21,6 +27,7 @@ class SharkTurnHandlerTest {
         handler = new SharkTurnHandler(new Random(2));
     }
 
+    /** Martwy rekin nie porusza się i nie zmienia energii. */
     @Test
     void deadSharkDoesNotAct() {
         Shark shark = new Shark("Rekin1", 5, 5);
@@ -33,6 +40,10 @@ class SharkTurnHandlerTest {
         assertEquals(0, shark.getEnergy());
     }
 
+    /**
+     * Rekin stojący na tej samej komórce co osłabiona rybka (energia 20) atakuje ją
+     * — rybka ginie, a w logach pojawia się słowo "zaatakował".
+     */
     @Test
     void sharkAttacksFishOnSameCell() throws Exception {
         Shark shark = new Shark("Rekin1", 8, 8);
@@ -50,6 +61,7 @@ class SharkTurnHandlerTest {
         assertFalse(fish.isAlive());
     }
 
+    /** Rekin na komórce z planktonem zjada go podczas tury. */
     @Test
     void sharkEatsPlanktonOnSameCell() throws Exception {
         Shark shark = new Shark("Rekin1", 2, 2);
@@ -64,6 +76,7 @@ class SharkTurnHandlerTest {
         assertFalse(plankton.isAlive());
     }
 
+    /** Rekin wykrywający rybkę w zasięgu 7 pól zbliża się do niej — odległość po turze maleje. */
     @Test
     void sharkMovesTowardFishWithinDetectionRange() throws Exception {
         Shark shark = new Shark("Rekin1", 0, 0);
@@ -79,6 +92,7 @@ class SharkTurnHandlerTest {
                 < fish.getPosition().distanceTo(new Position(0, 0)));
     }
 
+    /** Rekin zużywa dokładnie 5×5 = 25 energii na ruch w ciągu jednej tury. */
     @Test
     void sharkConsumesMoveEnergyEachTurn() {
         Shark shark = new Shark("Rekin1", 15, 15);
@@ -91,6 +105,7 @@ class SharkTurnHandlerTest {
         assertEquals(100 - LivingEntity.MOVE_ENERGY_COST * LivingEntity.MAX_MOVES_PER_TURN, shark.getEnergy());
     }
 
+    /** Rekin goni rybkę (dalej, ale wyżej priorytetowo) zamiast zbliżonego planktonu. */
     @Test
     void sharkPrioritizesFishOverCloserPlanktonInRange() throws Exception {
         Shark shark = new Shark("Rekin1", 10, 10);
