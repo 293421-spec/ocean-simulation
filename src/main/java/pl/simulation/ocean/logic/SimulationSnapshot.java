@@ -3,6 +3,11 @@ package pl.simulation.ocean.logic;
 import pl.simulation.ocean.model.*;
 import pl.simulation.ocean.util.Position;
 
+/**
+ * Snapshot stanu symulacji używany wyłącznie przez GUI ({@link pl.simulation.ocean.view.SimulationWindow})
+ * do cofania tury. Przechowuje numer tury oraz tablice pozycji i energii / flagi życia
+ * wszystkich organizmów w oceanie w momencie zapisu.
+ */
 public final class SimulationSnapshot {
 
     private final int turnNumber;
@@ -17,6 +22,13 @@ public final class SimulationSnapshot {
         this.planktonState = planktonState;
     }
 
+    /**
+     * Tworzy snapshot bieżącego stanu symulacji: numer tury oraz dla każdego organizmu
+     * współrzędne (X, Y) i energię (dla planktonu: 0 = żywy, 1 = zjedzony).
+     *
+     * @param simulation symulacja, której stan ma zostać zapisany
+     * @return niezmienny obiekt snapshot'u do późniejszego {@link #restore}
+     */
     public static SimulationSnapshot capture(Simulation simulation) {
         Ocean ocean = simulation.getOcean();
         int[][] fish = new int[ocean.getFish().size()][3];
@@ -49,6 +61,13 @@ public final class SimulationSnapshot {
         return new SimulationSnapshot(simulation.getTurnNumber(), fish, sharks, plankton);
     }
 
+    /**
+     * Przywraca stan zapisany w tym snapshot'cie do wskazanej instancji symulacji.
+     * Metoda nadpisuje aktualny numer tury oraz iteruje po organizmach w oceanie, wywołując na nich
+     * metody {@code restoreState} z odpowiednimi parametrami z pamięci podręcznej.
+     *
+     * @param simulation instancja symulacji, do której ma zostać wpisany stan z snapshot'u
+     */
     public void restore(Simulation simulation) {
         simulation.setTurnNumber(turnNumber);
         Ocean ocean = simulation.getOcean();
